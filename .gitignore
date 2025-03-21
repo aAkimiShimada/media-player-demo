@@ -1,0 +1,12 @@
+package-lock.json
+node_modules
+*.mp4
+*.m4s
+*.mpd
+*.h264
+*.aac
+*.yuv
+*.pcm
+
+._*
+.DS_Store

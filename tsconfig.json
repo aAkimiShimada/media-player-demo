@@ -1,0 +1,10 @@
+{
+	"files": [],
+	// それぞれのツールごとに別々の `tsconfig.json` ファイルを用意して設定を記載している
+	"references": [
+		{ "path": "./tsconfig.web.json" },
+		{ "path": "./scripts/tsconfig.clean_files.json" },
+		{ "path": "./scripts/tsconfig.server.json" },
+		{ "path": "./scripts/tsconfig.converter.json" }
+	]
+}

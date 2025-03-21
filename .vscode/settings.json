@@ -1,0 +1,19 @@
+{
+	// このリポジトリ内のファイルに対する設定
+	// `.editorconfig` と同じ設定にしている
+	"editor.tabSize": 2,
+	"editor.insertSpaces": false,
+	"files.trimFinalNewlines": true,
+	"files.trimTrailingWhitespace": true,
+	"[markdown]": {
+		"files.trimTrailingWhitespace": false
+	},
+	// Deno の拡張機能を利用している場合は、この設定を無効化する
+	"deno.enable": false,
+	// 大きなディレクトリは監視を無効化する
+	"files.watcherExclude": {
+		"**/.git/objects/**": true,
+		"**/.git/subtree-cache/**": true,
+		"**/node_modules": true
+	},
+}

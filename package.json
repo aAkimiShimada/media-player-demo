@@ -1,0 +1,25 @@
+{
+	"name": "media-player-demo",
+	"version": "1.0.0",
+	"scripts": {
+		"build": "npm run build-step-babel && npm run build-step-clean-files",
+		"build-step-babel": "babel ts_src --out-dir js_src --extensions \".ts\"",
+		"build-step-clean-files": "tsx scripts/clean_files.ts",
+		"serve": "tsx scripts/server.ts",
+		"serve-throttling": "tsx scripts/server.ts throttling",
+		"convert": "tsx scripts/converter/main.ts"
+	},
+	"keywords": [],
+	"author": "Akimi Shimada",
+	"description": "MSE + EME (Clear Key) を使う簡単な動画配信サーバーと動画プレーヤーの実装",
+	"devDependencies": {
+		"@babel/cli": "^7.27.0",
+		"@babel/core": "^7.26.10",
+		"@babel/preset-typescript": "^7.27.0",
+		"@types/express": "^5.0.1",
+		"@types/node": "^22.14.0",
+		"babel-plugin-add-import-extension": "^1.6.0",
+		"express": "^5.1.0",
+		"tsx": "^4.19.3"
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		// `tsconfig.json` を介して構成できるようにする
+		"composite": true,
+		// 出力先の JavaScript バージョン
+		"target": "ESNext",
+		// モジュールシステムの JavaScript バージョン
+		"module": "ESNext",
+		// この設定ファイルの対象とするルートディレクトリ
+		"rootDir": "scripts",
+		// TypeScript でデフォルトで有効にする機能
+		"lib": ["ES2020"],
+		// コメント削除はしない
+		"removeComments": false,
+		// `const enum` を保持する
+		"preserveConstEnums": true,
+		// ソースマップは生成しない
+		"sourceMap": false,
+		// CommonJS モジュールのインポートを可能にする
+		"esModuleInterop": true,
+		// `import x from y` によるインポートを認める
+		"allowSyntheticDefaultImports": true
+	},
+	// 対象とするファイル
+	"include": [
+		"scripts/server.ts",
+		"scripts/regex_lib.ts"
+	]
+}

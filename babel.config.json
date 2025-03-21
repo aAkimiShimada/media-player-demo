@@ -1,0 +1,10 @@
+{
+	"presets": [
+		// TypeScript の JavaScript へのトランスパイルのみを行う
+		"@babel/preset-typescript"
+	],
+	"plugins": [
+		// `import` 文でファイルパスの末尾に `.js` を付ける
+		[ "babel-plugin-add-import-extension", { "extension": "js" } ]
+	]
+}

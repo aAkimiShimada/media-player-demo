@@ -1,0 +1,6 @@
+{
+	"recommendations": [
+		// EditorConfig によりファイル編集のルールを統制しているので、 EditorConfig 拡張機能をおすすめするようにしている。
+		"EditorConfig.EditorConfig"
+	]
+}

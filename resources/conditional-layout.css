@@ -1,0 +1,63 @@
+/* このファイルではレイアウト設定によって変化するレイアウトスタイルを規定している */
+
+/* 特にレイアウト設定がなされていない場合 */
+body:is(
+	:not(.vertical-layout):not(.horizontal-layout),
+	/* 両方指定した場合も設定されていないものとみなす */
+	.vertical-layout.horizontal-layout
+) {
+	/*
+	 * 最初にレイアウト決定に関わるパラメータを用意している
+	 * 後のレイアウトモードを指定した場合では、 `body` 要素に対してこれらの CSS 変数を指定することで、調整可能なようにしている。
+	 */
+	--width: 1920;
+	--height: 1080;
+	--player-width: 600px;
+	--player-height: 500px;
+	--controller-width: 500px;
+	--controller-height: 400px;
+
+	& {
+		flex-wrap: wrap;
+		align-content: center;
+	}
+	& > video {
+		margin: 0 auto;
+	}
+	& > #controller {
+		visibility: hidden;
+	}
+}
+
+/* 縦配置レイアウトモードの場合 */
+body.vertical-layout:not(.horizontal-layout) {
+	& {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+	& > video {
+		display: block;
+	}
+	& > #controller {
+		display: flex;
+		margin-top: 30px;
+	}
+}
+
+/* 横配置レイアウトモードの場合 */
+body.horizontal-layout:not(.vertical-layout) {
+	& {
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+	& > video {
+		display: inline-block;
+		height: var(--actual-player-height);
+	}
+	& > #controller {
+		display: inline-flex;
+		margin-left: 30px;
+	}
+}

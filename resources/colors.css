@@ -1,0 +1,72 @@
+/* このファイルでは色を規定する変数をまとめて定義している。 color-scheme によって値が変わったりするので、柔軟に対応できるようにしている。 */
+
+
+
+body {
+
+	--tag-bg-mse: #669966;
+	--tag-fg-mse: #f5fff5;
+	--tag-bg-eme: #666699;
+	--tag-fg-eme: #f5f5ff;
+
+	/* ライトモードの場合 */
+	&.appearance-light:not(.appearance-dark):not(.appearance-auto) {
+		--bg-body: #cccccc;
+		--bg-group: #ffffff;
+		--button-off-color: #666666;
+		--button-on-color: #3399cc;
+		--controller-item-key-color: #333333;
+		--controller-item-value-color: #666666;
+		--controller-item-separator-color: #999999;
+	}
+
+	/* ダークモードの場合 */
+	&.appearance-dark:not(.appearance-light):not(.appearance-auto) {
+		--bg-body: #666666;
+		--bg-group: #333333;
+		--button-off-color: #cccccc;
+		--button-on-color: #66ccff;
+		--controller-item-key-color: #ffffff;
+		--controller-item-value-color: #999999;
+		--controller-item-separator-color: #666666;
+	}
+
+	/* 自動モードの場合 (`appearance-auto` 以外の値が指定された場合も自動モードとする) */
+	:is(
+		/* 自動モードが指定された場合 */
+		&.appearance-auto:not(.appearance-light):not(.appearance-dark),
+		/* 何も指定されていない場合 */
+		&:not(:is(.appearance-light,.appearance-dark,.appearance-auto)),
+		/* 指定のされ方が正しくない場合 */
+		&:not(:is(
+			/* 全ての正しい指定の仕方を下に列挙しており、上の行の `&:not(:is( ))` でこれらを打ち消している */
+			.appearance-light:not(.appearance-dark):not(.appearance-auto),
+			.appearance-dark:not(.appearance-light):not(.appearance-auto),
+			.appearance-auto:not(.appearance-light):not(.appearance-dark),
+			:not(:is(.appearance-light,.appearance-dark,.appearance-auto))
+		))
+	) {
+
+		@media (prefers-color-scheme: light) { & {
+			--bg-body: #cccccc;
+			--bg-group: #ffffff;
+			--button-off-color: #666666;
+			--button-on-color: #3399cc;
+			--controller-item-key-color: #333333;
+			--controller-item-value-color: #666666;
+			--controller-item-separator-color: #999999;
+		} }
+
+		@media (prefers-color-scheme: dark) { & {
+			--bg-body: #666666;
+			--bg-group: #333333;
+			--button-off-color: #cccccc;
+			--button-on-color: #66ccff;
+			--controller-item-key-color: #ffffff;
+			--controller-item-value-color: #999999;
+			--controller-item-separator-color: #666666;
+		} }
+
+	}
+
+}

@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		// `tsconfig.json` を介して構成できるようにする
+		"composite": true,
+		// 出力先の JavaScript バージョン
+		"target": "ESNext",
+		// モジュールシステムの JavaScript バージョン
+		"module": "ESNext",
+		// トランスパイルで生成する JavaScript ファイルの保存先ディレクトリ
+		"outDir": "./js_src",
+		// この設定ファイルの対象とするルートディレクトリ
+		"rootDir": "ts_src",
+		// TypeScript でデフォルトで有効にする機能
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		// コメント削除はしない
+		"removeComments": false,
+		// `const enum` を保持する
+		"preserveConstEnums": true,
+		// ソースマップは生成しない
+		"sourceMap": false
+	},
+	// 対象とするファイル
+	"include": [
+		"ts_src/*.ts"
+	]
+}

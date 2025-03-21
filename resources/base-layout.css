@@ -1,0 +1,203 @@
+/* このファイルでは条件によらず常に使用するレイアウトスタイルを規定している */
+
+/* 定数値を定義 */
+body {
+	--transition-duration-color: 0.1s;
+	--transition-duration-size: 0.1s;
+}
+
+html, body {
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	cursor: default;
+}
+
+html {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+body {
+	background-color: var(--bg-body);
+	position: relative;
+	display: block flex;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 30px;
+	width: 100%;
+	height: 100%;
+	overflow: scroll scroll;
+	transition:
+		background-color var(--transition-duration-color) ease-in-out;
+	--actual-player-width: min(
+		var(--player-width),
+		var(--player-height) / var(--height) * var(--width)
+	);
+	--actual-player-height: min(
+		var(--player-height),
+		var(--player-width) / var(--width) * var(--height)
+	);
+}
+
+video {
+	background-color: var(--bg-group);
+	position: relative;
+	width: var(--actual-player-width);
+	height: var(--actual-player-height);
+	transition:
+		background-color var(--transition-duration-color) ease-in-out,
+		width var(--transition-duration-size) ease-in-out,
+		height var(--transition-duration-size) ease-in-out;
+}
+#controller {
+	background-color: var(--bg-group);
+	/* border-radius: 10px; の代わりに使用する */
+	clip-path: inset(0 0 round 10px 10px 10px 10px);
+	width: var(--controller-width);
+	height: var(--controller-height);
+	position: relative;
+	flex-direction: column;
+	transition:
+		background-color var(--transition-duration-color) ease-in-out,
+		width var(--transition-duration-size) ease-in-out,
+		height var(--transition-duration-size) ease-in-out;
+}
+
+#controller-items {
+	margin-bottom: 5px;
+	padding: 5px 0;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	flex: 1;
+	& > .item {
+		margin: 0 15px;
+		padding: 5px 5px;
+		min-height: 50px;
+		box-sizing: border-box;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		border-top: solid var(--controller-item-separator-color) 1px;
+		transition: border-top-color var(--transition-duration-color) ease-in-out;
+		&:first-of-type {
+			border-top-style: none;
+		}
+		& > :is(.key, .value) {
+			font-size: 20px;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+		}
+		& > div.key {
+			color: var(--controller-item-key-color);
+			margin-left: 10px;
+		}
+		& > div.value {
+			color: var(--controller-item-value-color);
+			&:not(.tags) {
+				cursor: text;
+				user-select: text;
+				-webkit-user-select: text;
+				-moz-user-select: text;
+				margin-right: 10px;
+			}
+			&.mono {
+				font-family: 'Courier New', Courier, monospace;
+				font-weight: bolder;
+			}
+			&.tags {
+				margin-right: 5px;
+			}
+		}
+		& > select.value {
+			color: var(--controller-item-value-color);
+			font-size: 18px;
+			padding: 5px 7px;
+			clip-path: inset(0 0 round 20px 20px 20px 20px);
+			border: none;
+			outline: none;
+			background-color: rgba(50%,50%,50%,20%);
+		}
+		& > * {
+			transition: color var(--transition-duration-color) ease-in-out;
+		}
+	}
+}
+
+#controller-footer {
+	padding: 10px 20px;
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	box-sizing: border-box;
+	justify-content: flex-end;
+	& .button-group {
+		margin-right: 20px;
+		&:last-of-type {
+			margin-right: 0;
+		}
+	}
+	& button {
+		margin-right: 10px;
+		width: 25px;
+		height: 25px;
+		background-color: transparent;
+		border: none;
+		outline: none;
+		padding: 0;
+		cursor: pointer;
+		&.selected {
+			cursor: default;
+		}
+		&:last-of-type {
+			margin-right: 0;
+		}
+		& > svg {
+			width: 100%;
+			height: 100%;
+			--tint-color: var(--button-off-color);
+			& path.fill {
+				fill: var(--tint-color);
+				transition: fill var(--transition-duration-color) ease-in-out;
+			}
+			& path.stroke {
+				stroke: var(--tint-color);
+				transition: stroke var(--transition-duration-color) ease-in-out;
+			}
+		}
+		&.selected > svg {
+			--tint-color: var(--button-on-color);
+		}
+	}
+}
+
+.tag {
+	display: inline;
+	&::after{
+		font-size: 16px;
+		font-weight: bold;
+		margin-left: 4px;
+		padding: 4px 10px;
+		clip-path: inset(0 0 round 12px 12px 12px 12px);
+		transition:
+			color var(--transition-duration-color) ease-in-out,
+			background-color var(--transition-duration-color) ease-in-out;
+	}
+	&.mse::after {
+		color: var(--tag-fg-mse);
+		background-color: var(--tag-bg-mse);
+		content: "MSE";
+	}
+	&.auto-res::after {
+		color: var(--tag-fg-mse);
+		background-color: var(--tag-bg-mse);
+		content: "自動解像度";
+	}
+	&.eme::after {
+		color: var(--tag-fg-eme);
+		background-color: var(--tag-bg-eme);
+		content: "EME";
+	}
+}
