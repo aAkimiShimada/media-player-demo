@@ -6,13 +6,13 @@ import type { EncryptionKeys } from "./eme_utils";
 
 
 /** MSE API の機能の有効/無効を切り替える */
-export const enableMSE: boolean = false;
+export const enableMSE: boolean = true;
 
 /** EME API の機能の有効/無効を切り替える */
-export const enableEME: boolean = false;
+export const enableEME: boolean = true;
 
 /** 解像度の「自動」設定の有効/無効を切り替える */
-export const enableAutoResolution: boolean = false;
+export const enableAutoResolution: boolean = true;
 
 
 
@@ -53,8 +53,9 @@ export const getVideoSegmentUrl = (
 	resIndex: ResIndex,
 	segmentIndex: number
 ): string => {
-	// TODO: これから実装する
-	return "media/segments/video_1/seg-0.m4s";
+	const dir = `media/segments/video_${resIndex}`;
+	const base = segmentIndex < 0 ? "init.mp4" : `seg-${segmentIndex}.m4s`;
+	return `${dir}/${base}`;
 };
 
 /**
@@ -67,8 +68,9 @@ export const getVideoSegmentUrl = (
 export const getAudioSegmentUrl = (
 	segmentIndex: number
 ): string => {
-	// TODO: これから実装する
-	return "media/segments/audio/seg-0.m4s";
+	const dir = "media/segments/audio";
+	const base = segmentIndex < 0 ? "init.mp4" : `seg-${segmentIndex}.m4s`;
+	return `${dir}/${base}`;
 };
 
 
@@ -94,10 +96,18 @@ export const getAudioSegmentUrl = (
 export const getOptimalResolution = (
 	playerState: PlayerState
 ): ResIndex => {
-	// TODO: これから実装する
 	// ヒント: 最大でとりうるバッファの長さ (秒数) は `maxBufferDuration` 変数で規定されている。この値をもとに考えてみよう
-	// このままだと常に最も低い解像度で再生されてしまいます
-	return 1;
+
+	/** 取っているバッファの長さ (秒数) */
+	const marginSec =
+		(playerState.lastLoadedSegmentIndex + 1) * segmentDuration
+		- Math.floor(playerState.currentTime);
+
+	if (marginSec <=  2) return 1;
+	if (marginSec <=  4) return 2;
+	if (marginSec <=  6) return 3;
+	if (marginSec <=  8) return 4;
+	return 5;
 };
 
 
@@ -105,12 +115,12 @@ export const getOptimalResolution = (
 /** 暗号化キー */
 export const encryptionKeys: EncryptionKeys = {
 	video: {
-		keyId: "",
-		key: ""
+		keyId: "da657d4a15ea5443e810ef134dcab506",
+		key: "43bfcb236542e6f3b1797a999e8c1bf5"
 	},
 	audio: {
-		keyId: "",
-		key: ""
+		keyId: "3f7556f4ccd9a87f508271a80d242a7d",
+		key: "b1b22314e8b3c851a56487da432036a8"
 	}
 };
 

@@ -17,12 +17,12 @@ export type Resolution = typeof resolutions[number];
 /** 暗号化キーの設定 */
 export const encryptionKeys: EncryptionKeys = {
 	video: {
-		keyId: "",
-		key: ""
+		keyId: "da657d4a15ea5443e810ef134dcab506",
+		key: "43bfcb236542e6f3b1797a999e8c1bf5"
 	},
 	audio: {
-		keyId: "",
-		key: ""
+		keyId: "3f7556f4ccd9a87f508271a80d242a7d",
+		key: "b1b22314e8b3c851a56487da432036a8"
 	}
 };
 
