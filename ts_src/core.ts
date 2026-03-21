@@ -1,4 +1,4 @@
-// このファイルは動画プレーヤのための各種処理のエントリーポイントとして機能する
+// このファイルでは動画プレーヤのための各種処理のエントリーポイントになる `main` 関数を実装する
 
 import { enableMSE, enableEME } from "./consts";
 import { setupMSE } from "./mse";

@@ -1,6 +1,41 @@
-// このファイルでは、処理に必要な定数値を設定しています
+// このファイルでは変換処理に必要な定数値を定義して設定している
 
-import type { EncryptionKeys } from "./utils";
+import type { EncryptionKeys } from "~/types/crypt";
+import type { ConvertDescription } from "~/types/convert-description";
+
+
+
+/** 処理内容の指定 */
+export const convertDescription: ConvertDescription = {
+	tool: "shaka",
+	runMode: "mse",
+	skipPreprocess: false,
+	container: "mp4",
+	videoCodec: "h264",
+	audioCodec: "aac",
+	pssh: true,
+	piff: false,
+	direct: false,
+	emitMpd: false,
+};
+
+/**
+ * 出力データを `media` ディレクトリの直下に置くのではなく、 `media/out_*` ディレクトリに配置する機能の有効化/無効化を切り替える。
+ *
+ * 構成ごとに別のディレクトリに分けたい場合にはこのオプションを `true` に設定します。
+ *
+ * 例えばオフにしていると `media/segments` に出力されるセグメントデータがオンにしていると `media/out_shaka_h264_aac/segments` といったディレクトリに出力されるようになる。
+ */
+export const useOutDirectories: boolean = false;
+
+/**
+ * `useOutDirectories` を `true` に設定している場合にカスタムなディレクトリ名を設定できる。
+ *
+ * 例えば `useCustomOutDirName` に `"my_config"` を指定すると `media/out_my_config` に出力されるようになる。
+ *
+ * `null` に設定していると、現在のコーデックや使用ツールに合わせて適切な名前を指定する。例えば `media/out_shaka_h264_aac` のようなものである。
+ */
+export const useCustomOutDirName: string | null = null;
 
 
 
@@ -44,6 +79,13 @@ export const segmentDuration = 1.0;
  */
 export const segmentCount = 238;
 
+/**
+ * 映像のフレームレート
+ *
+ * ここには実際に使用する動画ファイルにおける fps の値を指定してください。
+ */
+export const videoFramerate = 30;
+
 
 
 // 動画ファイルのパスを設定
@@ -52,23 +94,32 @@ export const segmentCount = 238;
 /** オリジナルの動画ファイルのパス */
 export const originalPath = "media/movie.mp4";
 
+/**
+ * 出力先のパス
+ *
+ * 基本的には `useOutDirectories` と `useCustomOutDirName` の設定に合わせて自動的に設定されるが、どうしてもカスタマイズしたい場合は上書きして手動で文字列を指定することもできる。
+ */
+export const outputPath = (
+	!useOutDirectories ? "media" :
+	useCustomOutDirName != null ?
+	`media/out_${useCustomOutDirName}` :
+	`media/out_${convertDescription.tool}_${convertDescription.videoCodec}_${convertDescription.audioCodec}`
+);
+
+/** プリプロセスデータの保存されるディレクトリのパス */
+export const preprocessedDirPath = "media/intermediates";
+
 /** 中間ファイルのディレクトリのパス */
-export const intermediateDirPath = "media/intermediates";
+export const intermediateDirPath = `${outputPath}/intermediates`;
 
 /** セグメント分割したリソースが含まれるディレクトリのパス */
-export const segmentsDirPath = "media/segments";
+export const segmentsDirPath = `${outputPath}/segments`;
 
 /** 暗号化の上でセグメント分割したリソースが含まれるディレクトリのパス */
-export const encryptedSegmentsDirPath = "media/segments_encrypted";
+export const encryptedSegmentsDirPath = `${outputPath}/segments_encrypted`;
 
-/** DASH を使用する場合のセグメント分割したリソースが含まれるディレクトリのパス */
-export const segmentsDashDirPath = "media/segments_dash";
-
-/** DASH を使用する場合の暗号化の上でセグメント分割したリソースが含まれるディレクトリのパス */
-export const encryptedSegmentsDashDirPath = "media/segments_encrypted_dash";
-
-/** 暗号化のみを行なった場合の出力先の動画ファイルのパス */
-export const encryptedMediaPath = "media/encrypted.mp4";
+/** 暗号化のみを行なった場合の出力先の動画ファイルのパス (拡張子を除く) */
+export const encryptedMediaPath = `${outputPath}/encrypted`;
 
 
 
@@ -76,6 +127,9 @@ export const encryptedMediaPath = "media/encrypted.mp4";
 
 /** コマンドは実際には実行せずに、実行予定のコマンドのみを示す */
 export const dryRun: boolean = false;
+
+/** 並列に実行可能な部分もあえて並列で実行しないようにする */
+export const disableParallel: boolean = false;
 
 /** 実行するコマンドの内容を逐一表示する */
 export const showCommands: boolean = true;

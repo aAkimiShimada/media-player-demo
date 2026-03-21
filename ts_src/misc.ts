@@ -1,4 +1,4 @@
-// このファイルでは MSE でも EME でもないそのほかの細かな関数を用意している
+// このファイルでは MSE や EME と間接的に関わる細かな処理を実装している
 
 import { LOG, ERROR } from "./log";
 import { createMessenger } from "./utils";
@@ -27,7 +27,7 @@ export const removeSource = (video: HTMLVideoElement) => {
  */
 export const registerEventHandlers = (video: HTMLVideoElement) => {
 	const events = [
-		"canplay", "canplaythrough","ended", "loadeddata", "loadedmetadata", "loadstart", "pause", "play", "progress", "stalled", "suspend"
+		"canplay", "canplaythrough", "ended", "loadeddata", "loadedmetadata", "loadstart", "pause", "play", "progress", "stalled", "suspend"
 	];
 	events.forEach(eventName => {
 		video.addEventListener(eventName, () => {

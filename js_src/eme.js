@@ -11,9 +11,10 @@ const keySystem = "org.w3.clearkey";
 /** キーシステムに関する構成情報を規定する */
 const configs = [{
 	// 初期化データの種類
-	initDataTypes: ["cenc"],
-	// Common Encryption Scheme
-	// Clear Key では `cenc` にしか対応していない
+	initDataTypes: ["cenc", "webm"],
+	// Clear Key では `cenc` への対応が必須で、オプションとして他の形式に対応させることができる (参考: https://www.w3.org/TR/encrypted-media/#clear-key-capabilities)
+	// `cenc` は ISO/IEC 23001-7 で定められた MP4 特有の形式である
+	// 一方で `webm` は https://www.w3.org/TR/eme-initdata-webm/ で定められた WebM 特有の形式である
 	// 映像の復号化に関する情報
 	videoCapabilities: [{
 		contentType: videoMimeType
@@ -50,9 +51,9 @@ export const setupEME = video => {
  *     * `MediaKeys` の作成が同時に行われないようにする
  * */
 const startDecryption = async (video, event, mutex) => {
-	// 初期化データの形式として、 Clear Key では cenc にしか対応していないので、ブラウザがそれ以外の形式を要求してきたらここでブロックする
+	// 初期化データの形式として、 Clear Key では cenc (MP4 コンテナ) と webm (WebM コンテナ) にのみ対応しているので、ブラウザがそれ以外の形式を要求してきたらここでブロックする
 	LOG(`要求された初期化データの形式: ${event.initDataType}`, "EME");
-	if (event.initDataType !== "cenc") {
+	if (event.initDataType !== "cenc" && event.initDataType !== "webm") {
 		ERROR("Clear Key で対応していない初期化データの形式が要求されたため復号化できません", "EME");
 		return;
 	}

@@ -83,20 +83,20 @@ const tagInfo = {
 	// MSE API 関連のログに表示されるタグ
 	"MSE": {
 		text: "MSE API",
-		fgColor: "#f5fff5",
-		bgColor: "#669966"
+		fgColor: "#F2FAF6",
+		bgColor: "#45A878"
 	},
 	// EME API 関連のログに表示されるタグ
 	"EME": {
 		text: "EME API",
-		fgColor: "#f5f5ff",
-		bgColor: "#666699"
+		fgColor: "#F1F7FB",
+		bgColor: "#3F9ACB"
 	},
 	// トリガされたイベント関連のログに表示されるタグ
 	"Event": {
 		text: "イベント",
-		fgColor: "#fff5f5",
-		bgColor: "#996666"
+		fgColor: "#FFF4F5",
+		bgColor: "#D9555F"
 	}
 };
 

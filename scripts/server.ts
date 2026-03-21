@@ -1,8 +1,13 @@
-import express from "express";
+// このファイルは、サーバーを起動し、制御するためのコードを実装している
+
 import * as path from "node:path";
 import * as process from "node:process";
 import { setTimeout } from "node:timers/promises";
-import { r, regexOr, regexPathJoin, regexGroup } from "./regex_lib";
+
+import express from "express";
+
+import { printLn, color } from "@lib/output";
+import { r, regexOr, regexPathJoin, regexGroup } from "@lib/regex";
 
 /** 起動するサーバに関する設定情報の型 */
 interface Info {
@@ -30,17 +35,23 @@ const serve = (info: Info) => {
 	// 予め定義したパターンに合致しないパスへのアクセスがあったらブロックする
 	exApp.use((request, response, next) => {
 		if (!allowAccessPattern.test(request.path)) {
+			printLn(`${color.red("denied")}:  ${color.dim(request.path)}`);
 			response.status(404).end();
 		}
-		else next();
+		else {
+			printLn(`${color.green("allowed")}: ${request.path}`);
+			next();
+		}
 	});
 
-	/**
-	 * スロットリングに使用する位相
-	 *
-	 * 時間遅れは正弦振動により実装されている
-	 */
-	let phase = 0;
+	/** スロットリング開始時刻 */
+	const startTime = Date.now();
+
+	/** スロットリングが開始されるまでのウォームアップ期間 (ミリ秒) */
+	const warmupMs = 15_000;
+
+	/** 遅延の変動周期 (秒) */
+	const cycleSec = 40;
 
 	// カスタマイズ設定を用意する
 	exApp.use(async (request, response, next) => {
@@ -49,24 +60,36 @@ const serve = (info: Info) => {
 			"Access-Control-Allow-Origin": "*"
 		});
 
-		// スロットリングをしない場合はここで脱ける
+		// スロットリングが無効化されている場合はここで脱ける
 		if (!info.throttling) {
 			next();
 			return;
 		}
 
 		// 映像セグメントのパスかどうか判定し、そうでなければここで脱けて、次に進む
+		// 映像セグメントのみスロットリングを適用する
 		const videoSegment = getInfoOfVideoSegmentPath(request.path);
 		if (videoSegment == null) {
 			next();
 			return;
 		}
 
+		// ウォームアップ期間中は遅延なしで応答し、バッファを蓄積させる
+		const elapsed = Date.now() - startTime;
+		if (elapsed < warmupMs) {
+			next();
+			return;
+		}
+
 		// 遅延させる時間を決定する
-		const delay =
-			2 * (videoSegment.segmentIndex+1) *
-			Math.floor( Math.sin( phase / 180 * Math.PI ) * 300 );
-		phase = ( phase + 10 ) % 360;
+		// 時間ベースの正弦波により、リクエストレートに依存しない一定周期で遅延が変動する
+		// 解像度が高いほど遅延が大きくなることで、実際のネットワークにおける
+		// 高ビットレート = 遅い、低ビットレート = 速い、という状況を模擬する
+		// 最低解像度(1)では遅延なし、最高解像度(5)で最大遅延となる
+		const maxDelay = 3500;
+		const resolutionFactor = (videoSegment.resolution - 1) / 4;
+		const wave = (1 + Math.sin(2 * Math.PI * (elapsed / 1000) / cycleSec)) / 2;
+		const delay = Math.floor( wave * maxDelay * resolutionFactor );
 
 		// 遅延を実行
 		await setTimeout(delay);
@@ -112,38 +135,30 @@ const allowAccessPattern = (() => {
 		])
 	]);
 
-	/** `media` ディレクトリのうち、セグメント関連のディレクトリのパターン */
+	/** セグメント関連のディレクトリのパターン */
 	const segments = regexPathJoin([
 		regexOr([
 			"segments",
 			"segments_encrypted"
 		]),
 		regexOr([ r`audio`, r`video_[1-5]` ]),
-		regexOr([ r`init\.mp4`, r`seg\-[0-9]+\.m4s` ])
+		regexOr([
+			r`init\.mp4`, r`seg\-[0-9]+\.m4s`,
+			r`init\.webm`, r`seg\-[0-9]+\.webm`
+		])
 	]);
 
-	/** `media` ディレクトリのうち、 DASH を使うセグメント関連のディレクトリのパターン */
-	const segments_dash = regexPathJoin([
-		regexOr([
-			"segments_dash",
-			"segments_encrypted_dash"
-		]),
-		regexOr([
-			"audio/en/mp4a.40.2",
-			r`video/avc1/[1-5]`
-		]),
-		regexOr([ r`init\.mp4`, r`seg\-[0-9]+\.m4s` ])
+	/** 構成ごとのディレクトリのパターン */
+	const mediaItems = regexOr([
+		`movie\.mp4`,
+		`encrypted\.mp4`,
+		segments
 	]);
 
 	/** `media` ディレクトリのパターン */
-	const media = regexPathJoin([
-		"media",
-		regexOr([
-			"movie.mp4",
-			"encrypted.mp4",
-			segments,
-			segments_dash
-		])
+	const media = regexOr([
+		regexPathJoin([ "media", mediaItems ]),
+		regexPathJoin([ "media", r`[^/]+`, mediaItems ]),
 	]);
 
 	/** アクセス可能な全てのパスのパターン */
@@ -172,14 +187,13 @@ const getInfoOfVideoSegmentPath = (() => {
 	/** パスのパターン */
 	const pattern = RegExp(
 		regexPathJoin([
-			"", "media",
 			regexOr(["segments", "segments_encrypted"]),
 			`video_${regexGroup(
 				"resolution", r`[1-5]`
 			)}`,
 			`seg-${regexGroup(
 				"segmentIndex", r`[0-9]+`
-			)}${r`\.m4s`}`,
+			)}${regexOr([ r`\.m4s`, r`\.webm` ])}`,
 		])
 	);
 
