@@ -88,9 +88,35 @@ export const encryptionKeys = {
 
 // 動画ファイルのデータ形式
 
-/** 映像部分のコーデック情報も含んだ MIME タイプ */
+/**
+ * 映像部分のコーデック情報も含んだ MIME タイプ
+ *
+ * 指定の例
+ * * `video/mp4; codecs="avc1.64001e"`: H.264 (Main profile) in MP4
+ * * `video/mp4; codecs="avc1.42001e"`: H.264 (Baseline profile) in MP4
+ * * `video/mp4; codecs="avc1.4d001e"`: H.264 (High profile) in MP4
+ * * `video/mp4; codecs="hev1.1.6.L93.B0"`: H.265/HEVC (Main profile) in MP4
+ * * `video/mp4; codecs="av01.0.08M.08"`: AV1 in MP4
+ * * `video/webm; codecs="av1"`: AV1 in WebM
+ * * `video/webm; codecs="vp8"`: VP8 in WebM
+ * * `video/mp4; codecs="vp08"`: VP8 in MP4
+ * * `video/webm; codecs="vp9"`: VP9 in WebM
+ * * `video/mp4; codecs="vp09.00.10.08"`: VP9 in MP4
+ */
 export const videoMimeType = 'video/mp4; codecs="avc1.64001e"';
-/** 音声部分のコーデック情報も含んだ MIME タイプ */
+
+/**
+ * 音声部分のコーデック情報も含んだ MIME タイプ
+ *
+ * 指定の例
+ * * `audio/mp4; codecs="mp4a.40.2"`: AAC (LC) in MP4
+ * * `audio/mp4; codecs="mp4a.40.5"`: HE-AAC in MP4
+ * * `audio/mp4; codecs="mp4a.40.29"`: HE-AAC v2 in MP4
+ * * `audio/mp4; codecs="ac-3"`: AC-3 in MP4
+ * * `audio/mp4; codecs="ec-3"`: E-AC-3 in MP4
+ * * `audio/webm; codecs="opus"`: Opus in WebM
+ * * `audio/webm; codecs="vorbis"`: Vorbis in WebM
+ */
 export const audioMimeType = 'audio/mp4; codecs="mp4a.40.2"';
 
 // 使用する動画に合わせて変えるべき設定

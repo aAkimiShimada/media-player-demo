@@ -1,51 +1,40 @@
-// このファイルは、動画コンバータのエントリポイントを構成している
-// 使用する処理を選択して実行する
+// このファイルでは動画コンバータのエントリポイントを構成している
+// 実行する処理を選択して実行する
 
-import {
-	create_demo_of_mse,
-	create_demo_of_mse_eme,
-	create_demo_of_eme
-} from "./template";
-import {
-	create_demo_of_mse_dash,
-	create_demo_of_mse_eme_dash
-} from "./template_dash";
+import { convertDescription } from "~/consts";
+
+import { Tool } from "~/types/convert-description";
+
+import { bento4Template } from "~/bento4/template";
+import { ffmpegTemplate } from "~/ffmpeg/template";
+import { mp4boxTemplate } from "~/gpac/template-mp4box";
+import { gpacTemplate } from "~/gpac/template-gpac";
+import { packagerTemplate } from "~/shaka/template";
 
 /**
- * 動画コンバータのエントリーポイントを規定しています。
- *
- * 事前に用意された処理内容のテンプレートのうち1つを選択して `main` 関数内に記載して使用します。
- *
- * 例) `create_demo_of_mse` を選択する場合
- *
- * ```JavaScript
- * const main = async () => {
- *     await create_demo_of_mse();
- * };
- * ```
+ * 動画コンバータのエントリーポイントを規定している
  */
 const main = async () => {
-
-	// 以下に処理テンプレートの名前を1つだけ記載します。
-
-	await create_demo_of_mse();
-
-	// 選択肢
-	//
-	// * `create_demo_of_mse`
-	//     * MSE のみを使う形に動画ファイルを変換します
-	// * `create_demo_of_mse_eme`
-	//     * MSE  + EME の両方を使う形に動画ファイルを変換します
-	// * `create_demo_of_eme`
-	//     * EME のみを使う形に動画ファイルを変換します
-	// * `create_demo_of_mse_dash`
-	//     * MSE のみを使う形に動画ファイルを変換します
-	//     * DASH の形式になっています
-	// * `create_demo_of_mse_eme_dash`
-	//     * MSE  + EME の両方を使う形に動画ファイルを変換します
-	//     * DASH の形式になっています
-
+	// 選択したツールに基づいて条件分岐
+	switch (convertDescription.tool) {
+		case Tool.FFmpeg:
+			ffmpegTemplate(convertDescription);
+			break;
+		case Tool.Bento4:
+			bento4Template(convertDescription);
+			break;
+		case Tool.MP4Box:
+			mp4boxTemplate(convertDescription);
+			break;
+		case Tool.GPAC:
+			gpacTemplate(convertDescription);
+			break;
+		case Tool.ShakaPackager:
+			packagerTemplate(convertDescription);
+			break;
+	}
 };
 
-// 実行開始
+// 実行開始する
+// エラーの場合はログに出力される
 main().catch(console.error);

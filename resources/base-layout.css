@@ -52,8 +52,7 @@ video {
 }
 #controller {
 	background-color: var(--bg-group);
-	/* border-radius: 10px; の代わりに使用する */
-	clip-path: inset(0 0 round 10px 10px 10px 10px);
+	border-radius: 10px;
 	width: var(--controller-width);
 	height: var(--controller-height);
 	position: relative;
@@ -70,6 +69,18 @@ video {
 	overflow-x: hidden;
 	overflow-y: scroll;
 	flex: 1;
+	&::-webkit-scrollbar {
+		width: 10px;
+	}
+	&::-webkit-scrollbar-track {
+    background: transparent;
+		margin-top: 10px;
+		margin-right: 2px;
+	}
+	&::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 5px;
+  }
 	& > .item {
 		margin: 0 15px;
 		padding: 5px 5px;
@@ -114,7 +125,7 @@ video {
 			color: var(--controller-item-value-color);
 			font-size: 18px;
 			padding: 5px 7px;
-			clip-path: inset(0 0 round 20px 20px 20px 20px);
+			border-radius: 20px;
 			border: none;
 			outline: none;
 			background-color: rgba(50%,50%,50%,20%);
@@ -180,7 +191,7 @@ video {
 		font-weight: bold;
 		margin-left: 4px;
 		padding: 4px 10px;
-		clip-path: inset(0 0 round 12px 12px 12px 12px);
+		border-radius: 12px;
 		transition:
 			color var(--transition-duration-color) ease-in-out,
 			background-color var(--transition-duration-color) ease-in-out;
@@ -191,8 +202,8 @@ video {
 		content: "MSE";
 	}
 	&.auto-res::after {
-		color: var(--tag-fg-mse);
-		background-color: var(--tag-bg-mse);
+		color: var(--tag-fg-auto);
+		background-color: var(--tag-bg-auto);
 		content: "自動解像度";
 	}
 	&.eme::after {

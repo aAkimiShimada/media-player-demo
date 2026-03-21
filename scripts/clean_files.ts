@@ -1,10 +1,14 @@
+// このファイルは TypeScript からのビルド時に生成される JavaScript を整形するコードが用意されています。
+// TypeScript のコードをなるべく遜色なく JavaScript に変換するためのユーティリティ実装です。
+
 import {
 	readdirSync,
 	statSync,
 	readFileSync, writeFileSync
 } from "node:fs";
 import { join as pathJoin } from "node:path";
-import { r, regexConcat, regexGroup, regexOr } from "./regex_lib";
+
+import { r, regexConcat, regexGroup, regexOr } from "@lib/regex";
 
 // JavaScript ファイルが保存されているディレクトリ
 const outputDir = "js_src";
@@ -20,7 +24,7 @@ const cleanJsFiles = (targetDir: string) => {
 		// ディレクトリの場合はその内側の JavaScript ファイルを探索する
 		const stat = statSync(path);
 		if (stat.isDirectory() && !stat.isSymbolicLink()) {
-			removeJsDocForEmptyStatement(path);
+			cleanJsFiles(path);
 			continue;
 		}
 

@@ -4,15 +4,18 @@
 
 body {
 
-	--tag-bg-mse: #669966;
-	--tag-fg-mse: #f5fff5;
-	--tag-bg-eme: #666699;
-	--tag-fg-eme: #f5f5ff;
+	--tag-bg-mse: #45A878;
+	--tag-fg-mse: #F2FAF6;
+	--tag-bg-eme: #3F9ACB;
+	--tag-fg-eme: #F1F7FB;
+	--tag-bg-auto: #8F63D1;
+	--tag-fg-auto: #FAF5FD;
 
 	/* ライトモードの場合 */
 	&.appearance-light:not(.appearance-dark):not(.appearance-auto) {
 		--bg-body: #cccccc;
 		--bg-group: #ffffff;
+		--scrollbar: #99999933;
 		--button-off-color: #666666;
 		--button-on-color: #3399cc;
 		--controller-item-key-color: #333333;
@@ -24,6 +27,7 @@ body {
 	&.appearance-dark:not(.appearance-light):not(.appearance-auto) {
 		--bg-body: #666666;
 		--bg-group: #333333;
+		--scrollbar: #99999933;
 		--button-off-color: #cccccc;
 		--button-on-color: #66ccff;
 		--controller-item-key-color: #ffffff;
@@ -50,6 +54,7 @@ body {
 		@media (prefers-color-scheme: light) { & {
 			--bg-body: #cccccc;
 			--bg-group: #ffffff;
+			--scrollbar: #99999933;
 			--button-off-color: #666666;
 			--button-on-color: #3399cc;
 			--controller-item-key-color: #333333;
@@ -60,6 +65,7 @@ body {
 		@media (prefers-color-scheme: dark) { & {
 			--bg-body: #666666;
 			--bg-group: #333333;
+			--scrollbar: #99999933;
 			--button-off-color: #cccccc;
 			--button-on-color: #66ccff;
 			--controller-item-key-color: #ffffff;

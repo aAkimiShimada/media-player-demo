@@ -16,4 +16,22 @@
 		"**/.git/subtree-cache/**": true,
 		"**/node_modules": true
 	},
+	// スペルチェックで無視すべき (正しいスペルとして認識すべき) 単語を列挙している
+	"cSpell.words": [
+		// ツールの名称
+		"bento4", "gpac",
+		// 仕様の名称
+		"cenc", "pssh", "piff",
+		// ソフトウェアやライブラリの名称
+		"ffprobe",
+		"libx264",
+		"libx265",
+		"libvpx",
+		"libsvtav1",
+		"opus", "vorbis",
+		"libfreetype",
+		// Homebrew 関連の名称
+		"linuxbrew",
+		"garnajee", "perso",
+	],
 }

@@ -15,6 +15,9 @@ export const playerStateMessenger = createMessenger({
 	isOffline: false
 });
 
+/** 動画全体の長さ (秒) */
+const totalDuration = segmentCount * segmentDuration;
+
 /**
  * 与えた `video` 要素に対して MSE API を使ったストリーミングのセットアップを行う
  * * 第1引数: `video` 要素の DOM (`HTMLVideoElement`)
@@ -62,6 +65,10 @@ const startStreaming = (video, mediaSource) => {
 		return buffer;
 	});
 
+	// メディアソースに動画全体の長さを設定する
+	// これにより `video` 要素のシークバーが全体の長さを反映するようになる
+	mediaSource.duration = totalDuration;
+
 	/** バッファーへのセグメントの追加•削除が同時に行えないようにロック機構を導入したもの */
 	const mutexBuffers = buffers.map(buffer => {
 		return createMutexSourceBuffer(buffer);
@@ -78,13 +85,16 @@ const startStreaming = (video, mediaSource) => {
 	/** 一時停止状態でシークしている時に、シーク操作が終わったことを確認するタイマー */
 	const seekEndTimer = createTimer();
 
+	/** `supplyBuffers` が現在実行中かを示すフラグ */
+	let isSupplying = false;
+
 	/** 最初のセグメントの取得を行う */
 	const initialSegmentFetch = () => {
 		// 失敗する場合に備え、失敗したら何回か取得を試みられるように周期的に呼び出す。
 		const timer = createTimer();
 		timer.start(async () => {
 			// 読み込みを試みる
-			const isSuccess = await supplyBuffers(mutexBuffers, taskManager);
+			const isSuccess = await supplyBuffersIfAvailable();
 			if (!isSuccess) return;
 
 			// 問題なくバッファできることが確認できたらタイマーを止める
@@ -92,7 +102,7 @@ const startStreaming = (video, mediaSource) => {
 			LOG("初期セグメントの取得が完了しました", "MSE");
 
 			// もう1つセグメントを取りに行く
-			await supplyBuffers(mutexBuffers, taskManager);
+			await supplyBuffersIfAvailable();
 		}, 1000, true);
 	};
 
@@ -104,7 +114,7 @@ const startStreaming = (video, mediaSource) => {
 		playerStateMessenger.notify();
 
 		// 新しいセグメントの取得が必要か確認し、必要であれば取得する
-		supplyBuffers(mutexBuffers, taskManager);
+		supplyBuffersIfAvailable();
 	};
 
 	/** 過去のセグメントのバッファは削除する */
@@ -133,6 +143,12 @@ const startStreaming = (video, mediaSource) => {
 		// バッファの取得を試みる
 		// 取得に失敗した場合も再挑戦できるように1秒ごとに何回も呼び出す
 		connectionTrialTimer.start(async () => {
+			// 別の supplyBuffers が進行中であれば、中断して次のサイクルでリカバリーできるようにする
+			if (isSupplying) {
+				taskManager.abort();
+				return;
+			}
+
 			// まだ取得を試みている状況であれば、静観する (このループでは何もしない)
 			if (!taskManager.isCompleted()) return;
 
@@ -142,14 +158,14 @@ const startStreaming = (video, mediaSource) => {
 			playerStateMessenger.notify();
 
 			// 取得を実行する
-			const isSuccess = await supplyBuffers(mutexBuffers, taskManager);
+			const isSuccess = await supplyBuffersIfAvailable();
 
 			// 読み込みに問題がなければタイマーを終了させてその先のセグメントもいくらかフェッチする
 			if (!isSuccess) return;
 			connectionTrialTimer.end();
 			let index = 0;
 			while (index < advanceSegmentsAfterWaiting) {
-				await supplyBuffers(mutexBuffers, taskManager);
+				await supplyBuffersIfAvailable();
 				index += 1;
 			}
 		}, 1000, true);
@@ -178,16 +194,32 @@ const startStreaming = (video, mediaSource) => {
 		if (video.paused) {
 			seekEndTimer.start(async () => {
 				// 読み込みを試みる
-				const isSuccess = await supplyBuffers(mutexBuffers, taskManager);
+				const isSuccess = await supplyBuffersIfAvailable();
 
 				// 読み込みに問題がなければその先のセグメントもいくらかフェッチする
 				if (!isSuccess) return;
 				let index = 0;
 				while (index < advanceSegmentsAfterSeekEnd) {
-					await supplyBuffers(mutexBuffers, taskManager);
+					await supplyBuffersIfAvailable();
 					index += 1;
 				}
 			}, 500, false);
+		}
+	};
+
+	/**
+	 * `supplyBuffers` を呼び出すラッパー関数
+	 *
+	 * `timeupdate` イベントなどから `supplyBuffers` が await なしに繰り返し呼び出される場合に、
+	 * 同時実行を防止して状態の競合を回避する
+	 */
+	const supplyBuffersIfAvailable = async () => {
+		if (isSupplying) return false;
+		isSupplying = true;
+		try {
+			return await supplyBuffers(mutexBuffers, taskManager);
+		} finally {
+			isSupplying = false;
 		}
 	};
 
@@ -254,8 +286,16 @@ const supplyBuffers = async (buffers, taskManager) => {
 
 	// オフラインになっているか、現在と異なる解像度を選択する場合には、初期セグメントを取得する
 	if (playerState.isOffline || differentResolutionSelected) {
-		// 別のセグメントをダウンロード中であればこの先の作業はしない
-		if (!taskManager.isCompleted()) return false;
+		// 別のセグメントをダウンロード中であれば中断して、新しい解像度での取得に切り替える
+		if (!taskManager.isCompleted()) {
+			taskManager.abort();
+		}
+
+		// 解像度変更時は最後に読み込み成功したセグメントの次から継続する
+		// (現在の再生位置にリセットすると lastLoadedSegmentIndex が後退し、
+		//  バッファが空と誤判定されて解像度が不安定になる)
+		playerState.nextLoadingSegmentIndex = Math.max(playerState.lastLoadedSegmentIndex + 1, Math.floor(playerState.currentTime / segmentDuration));
+		playerState.isOffline = false;
 
 		// 初期セグメントをバッファへ追加する操作を行う
 		const isSuccess = await appendBuffers(videoResolution, -1, buffers, taskManager);
@@ -283,8 +323,7 @@ const supplyBuffers = async (buffers, taskManager) => {
 	// 現在の再生位置を踏まえると必要なバッファが不足していると感じられたら、不足分のセグメントを不足しなくなるまで取得する
 	if (loadingPosition < bufferEndPosition) {
 		// 前に読み込もうとしていたセグメントの読み込みを行う
-		// 但し処理は非同期で行われる (`Promise` の解決を待たずに抜ける)
-		appendBuffers(playerState.resolution, playerState.nextLoadingSegmentIndex, buffers, taskManager);
+		await appendBuffers(playerState.resolution, playerState.nextLoadingSegmentIndex, buffers, taskManager);
 		// 次に読み込む予定のセグメント番号をセットする
 		playerState.nextLoadingSegmentIndex += 1;
 		// 変更を通知
@@ -337,7 +376,7 @@ const appendBuffers = async (videoResolution, segmentIndex, buffers, taskManager
 
 /**
  * 渡された URL の指すセグメントのデータを取得して、渡されたバッファーに追加する
- * * 第1引数: セグメントの  URL
+ * * 第1引数: セグメントの URL
  * * 第2引数: 追加するバッファ
  * * 第3引数: タスクマネージャ
  * * 戻り値: セグメントの取得に成功した場合は `true` 、さもなくば `false` を返す
